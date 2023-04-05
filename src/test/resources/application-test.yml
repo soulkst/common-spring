@@ -1,0 +1,38 @@
+server:
+  servlet:
+    context-path: ${CONTEXT_PATH:/}
+  error:
+    include-stacktrace: never
+    include-exception: false
+    include-binding-errors: never
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:api_mock
+    username: sa
+    password:
+
+  security:
+    user:
+      name: test
+      password: password
+    extension:
+      csrf:
+        header-name: X-CSRF-TOKEN
+        parameter-name: _csrf
+
+  messages:
+    encoding: UTF-8
+    basename: classpath:/messages
+    extension:
+      error-message:
+        code-prefix: error.
+        title-suffix: .title
+        message-suffix: .message
+    fallback-to-system-locale: true
+
+logging:
+  level:
+    root: info
+    dev.kirin: debug
+    web: debug

@@ -1,0 +1,96 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id 'maven-publish'
+    id 'org.springframework.boot' version '2.7.8'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id "co.uzzu.dotenv.gradle" version "2.0.0"
+}
+
+group 'dev.kirin.common'
+version '1.0.0-SNAPSHOT'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+Map<String, String> ENV_MAP = env.allVariables
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url ENV_MAP.getOrDefault("PRIVATE_REPO_URL", "")
+        allowInsecureProtocol = true
+        credentials {
+            username = ENV_MAP.getOrDefault("PRIVATE_REPO_CRED_USR", "NO_USER")
+            password = ENV_MAP.getOrDefault("PRIVATE_REPO_CRED_PSW", "NO_PASS")
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+    compileOnly 'javax.validation:validation-api:2.0.1.Final'
+    compileOnly 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.springframework.boot:spring-boot-starter-validation'
+    compileOnly 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compileOnly 'org.springframework.boot:spring-boot-starter-security'
+
+    compileOnly 'org.springdoc:springdoc-openapi-ui:1.6.+'
+
+    compileOnly 'com.h2database:h2'
+
+    compileOnly 'dev.kirin.common:core:1.0.0-SNAPSHOT'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    testAnnotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    testImplementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-validation'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'com.h2database:h2'
+
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+
+    testImplementation 'javax.validation:validation-api:2.0.1.Final'
+
+    testImplementation 'dev.kirin.common:core:1.0.0-SNAPSHOT'
+
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            allowInsecureProtocol = true
+            url = ENV_MAP.getOrDefault("NEXUS_URL", "NEXUS_URL")
+            credentials {
+                username = ENV_MAP.getOrDefault("NEXUS_USERNAME", "NEXUS_USERNAME")
+                password = ENV_MAP.getOrDefault("NEXUS_PASSWORD", "NEXUS_PASSWORD") // the variable resides in $GRADLE_USER_HOME/gradle.properties
+            }
+        }
+    }
+}
