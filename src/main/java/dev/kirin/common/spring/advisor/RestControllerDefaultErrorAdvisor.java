@@ -43,6 +43,7 @@ public class RestControllerDefaultErrorAdvisor {
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorVo handleBindException(HttpServletRequest request, BindException e) {
+        log.debug("(handleBindException) stack-trace", e);
         BindingResult bindingResult = e.getBindingResult();
 
         String title = errorMessageHandler.getTitle(request, BindException.class, e.getLocalizedMessage());
@@ -57,13 +58,13 @@ public class RestControllerDefaultErrorAdvisor {
         ApiErrorVo result = ApiErrorVo.badRequest(request, e, title, detail);
         result.setMore(BindExceptionDetailVo.ofAll(bindingResult.getAllErrors()));
         log.error("(handleBindException) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        log.debug("(handleBindException) stack-trace", e);
         return result;
     }
 
     @ExceptionHandler(javax.validation.ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorVo handleConstraintViolationException(HttpServletRequest request, javax.validation.ConstraintViolationException e) {
+        log.debug("(handleConstraintViolationException) stack-trace", e);
         String fields = e.getConstraintViolations()
                 .stream()
                 .map(constraintViolation -> constraintViolation.getPropertyPath().toString())
@@ -73,13 +74,13 @@ public class RestControllerDefaultErrorAdvisor {
         ApiErrorVo result = ApiErrorVo.badRequest(request, e, title, detail);
         result.setMore(ConstraintViolationDetailVo.ofAll(e.getConstraintViolations()));
         log.error("(handleConstraintViolationException) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        log.debug("(handleConstraintViolationException) stack-trace", e);
         return result;
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorVo handleMethodArgumentTypeMismatchException(HttpServletRequest request, MethodArgumentTypeMismatchException e) {
+        log.debug("(handleMethodArgumentTypeMismatchException) stack-trace", e);
         String fieldName = e.getName();
         String definedTypeClass = e.getRequiredType().getName();
         String requestedTypeClass = e.getValue().getClass().getSimpleName();
@@ -87,25 +88,25 @@ public class RestControllerDefaultErrorAdvisor {
         String detail = errorMessageHandler.getDetail(request, e, fieldName, definedTypeClass, requestedTypeClass);
         ApiErrorVo result = ApiErrorVo.badRequest(request, e, title, detail);
         log.error("(handleMethodArgumentTypeMismatchException) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        log.debug("(handleMethodArgumentTypeMismatchException) stack-trace", e);
         return result;
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorVo handleMissingServletRequestParameterException(HttpServletRequest request, MissingServletRequestParameterException e) {
+        log.debug("(handleMissingServletRequestParameterException) stack-trace", e);
         String parameterName = e.getParameterName();
         String title = errorMessageHandler.getTitle(request, e);
         String detail = errorMessageHandler.getDetail(request, e, parameterName);
         ApiErrorVo result = ApiErrorVo.badRequest(request, e, title, detail);
         log.error("(handleMissingServletRequestParameterException) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        log.debug("(handleMissingServletRequestParameterException) stack-trace", e);
         return result;
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorVo handleHttpMessageNotReadableException(HttpServletRequest request, HttpMessageNotReadableException e) {
+        log.debug("(handleHttpMessageNotReadableException) stack-trace", e);
         if(e.getRootCause() instanceof InvalidFormatException) {
             // invalid json format
             InvalidFormatException ie = (InvalidFormatException) e.getRootCause();
@@ -114,7 +115,6 @@ public class RestControllerDefaultErrorAdvisor {
             ApiErrorVo result = ApiErrorVo.badRequest(request, ie, title, detail);
             result.setMore(InvalidJsonFormatDetailVo.of(ie));
             log.error("(handleHttpMessageNotReadableException - InvalidFormatException) uri = {}, cause = {}, response = {}", request.getRequestURI(), ie.getLocalizedMessage(), result);
-            log.debug("(handleHttpMessageNotReadableException - InvalidFormatException) stack-trace", ie);
             return result;
         }
 
@@ -125,18 +125,17 @@ public class RestControllerDefaultErrorAdvisor {
             body = StreamUtils.copyToString(httpInputMessage.getBody(), Charset.forName(request.getCharacterEncoding()));
         } catch (Exception e1) {
             log.error("(handleHttpMessageNotReadableException) Fail body stream to string. cause = {}", e1.getLocalizedMessage());
-            log.info("(handleHttpMessageNotReadableException) stack-trace", e1);
         }
         ApiErrorVo result = ApiErrorVo.badRequest(request, e, title);
         result.setMore(RequestDataDetailVo.of(httpInputMessage.getHeaders(), body));
         log.error("(handleHttpMessageNotReadableException) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        log.debug("(handleHttpMessageNotReadableException) stack-trace", e);
         return result;
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorVo handleHttpMediaTypeNotSupportedException(HttpServletRequest request, HttpMediaTypeNotSupportedException e) {
+        log.debug("(handleHttpMediaTypeNotSupportedException) stack-trace", e);
         String title = errorMessageHandler.getTitle(request, e);
         String detail = errorMessageHandler.getDetail(request, e, e.getContentType());
 
@@ -148,19 +147,18 @@ public class RestControllerDefaultErrorAdvisor {
         ApiErrorVo result = ApiErrorVo.badRequest(request, e, title, detail);
         result.setMore(supportMediaTypes);
         log.error("(handleHttpMediaTypeNotSupportedException) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        log.debug("(handleHttpMediaTypeNotSupportedException) stack-trace", e);
         return result;
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorVo handleHttpRequestMethodNotSupportedException(HttpServletRequest request, HttpRequestMethodNotSupportedException e) {
+        log.debug("(handleHttpRequestMethodNotSupportedException) stack-trace", e);
         String title = errorMessageHandler.getTitle(request, e);
         String detail = errorMessageHandler.getDetail(request, e, e.getMethod());
 
         ApiErrorVo result = ApiErrorVo.notFound(request, e, title, detail);
-        log.error("(handleUnknown) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        log.debug("(handleUnknown) stack-trace", e);
+        log.error("(handleHttpRequestMethodNotSupportedException) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
         result.setMore(e.getLocalizedMessage());
         return result;
     }
@@ -168,12 +166,12 @@ public class RestControllerDefaultErrorAdvisor {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiErrorVo handleUnknown(HttpServletRequest request, Exception e) {
+        log.debug("(handleUnknown) stack-trace", e);
         String title = errorMessageHandler.getTitle(request, e);
         String detail = errorMessageHandler.getDetail(request, e);
 
         ApiErrorVo result = ApiErrorVo.unknown(request, e, title, detail);
         log.error("(handleUnknown) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        log.debug("(handleUnknown) stack-trace", e);
         result.setMore(e.getLocalizedMessage());
         return result;
     }

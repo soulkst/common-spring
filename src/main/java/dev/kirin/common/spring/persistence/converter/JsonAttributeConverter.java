@@ -2,25 +2,22 @@ package dev.kirin.common.spring.persistence.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.AttributeConverter;
 import java.lang.reflect.ParameterizedType;
 
 @Slf4j
-@RequiredArgsConstructor
 public abstract class JsonAttributeConverter<T> implements AttributeConverter<T, String> {
     private final ObjectMapper objectMapper;
 
     private Class<T> targetClass;
 
-    @PostConstruct
-    void postConstruct() {
+    public JsonAttributeConverter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         this.targetClass = (Class<T>) ((ParameterizedType) getClass()
                 .getGenericSuperclass()).getActualTypeArguments()[0];
-        log.debug("(postConstruct) targetClass = {}", targetClass.getName());
+        log.debug("(constructor) targetClass = {}", targetClass.getName());
     }
 
     @Override

@@ -25,10 +25,11 @@ public class ErrorMessageHandlerImpl implements ErrorMessageHandler {
     @Builder
     ErrorMessageHandlerImpl(@NotNull MessageSource messageSource, String codePrefix, String titleSuffix, String messageSuffix) {
         this.messageSource = messageSource;
-
-        String errorCodeFormat = StringUtil.ifEmptyBlank(codePrefix) + "{}";
+        String errorCodeFormat = StringUtil.ifEmptyBlank(codePrefix) + StringUtil.FORMAT_MARKUP;
         this.errorTitleSuffix = errorCodeFormat + StringUtil.ifEmptyBlank(titleSuffix);
         this.errorMessageSuffix = errorCodeFormat + StringUtil.ifEmptyBlank(messageSuffix);
+
+        log.info("(constructor) formats. title = {}, message = {}", this.errorTitleSuffix, this.errorMessageSuffix);
     }
 
     @PostConstruct
@@ -47,6 +48,7 @@ public class ErrorMessageHandlerImpl implements ErrorMessageHandler {
     }
 
     private String getErrorMessage(String format, String code, Object[] args, String defaultValue, Locale locale) {
+        log.debug("(getErrorMessage) format = {}, code = {}", format, code);
         String messageCode = StringUtil.format(format, code);
         String defaultMessage = getDefaultMessage(format, code, defaultValue, locale);
         String resultMessage = messageSource.getMessage(StringUtil.format(format, code), args, defaultMessage, locale);
