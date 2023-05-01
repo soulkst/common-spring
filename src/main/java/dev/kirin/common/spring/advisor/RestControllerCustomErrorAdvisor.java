@@ -1,6 +1,5 @@
 package dev.kirin.common.spring.advisor;
 
-import dev.kirin.common.core.utils.StringUtil;
 import dev.kirin.common.spring.exception.InvalidArgumentException;
 import dev.kirin.common.spring.exception.NotFoundException;
 import dev.kirin.common.spring.extension.message.ErrorMessageHandler;
@@ -28,7 +27,7 @@ public class RestControllerCustomErrorAdvisor {
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleNotfoundException(HttpServletRequest request, NotFoundException e) {
+    public ApiErrorVo handleNotfoundException(HttpServletRequest request, NotFoundException e) {
         log.debug("(handleNotfoundException) stack-trace", e);
         Object[] messageArgs = new Object[]{e.getId(), e.getDomain()};
         String title = errorMessageHandler.getTitle(request, e, messageArgs);
@@ -37,12 +36,12 @@ public class RestControllerCustomErrorAdvisor {
         result.setMore(e.getMore());
 
         log.error("(handleNotfoundException) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        return StringUtil.BLANK;
+        return result;
     }
 
     @ExceptionHandler(InvalidArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleInvalidArgumentException(HttpServletRequest request, InvalidArgumentException e) {
+    public ApiErrorVo handleInvalidArgumentException(HttpServletRequest request, InvalidArgumentException e) {
         log.debug("(handleInvalidArgumentException) stack-trace", e);
         Object[] messageArgs = new Object[]{e.getDomain() + InvalidArgumentException.DELIMITER + e.getLocation(), e.getValue()};
         String title = errorMessageHandler.getTitle(request, e);
@@ -51,6 +50,6 @@ public class RestControllerCustomErrorAdvisor {
         result.setMore(e.getMore());
 
         log.error("(handleInvalidArgumentException) uri = {}, cause = {}, response = {}", request.getRequestURI(), e.getLocalizedMessage(), result);
-        return StringUtil.BLANK;
+        return result;
     }
 }
