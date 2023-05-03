@@ -79,6 +79,8 @@ dependencies {
 
     testImplementation 'dev.kirin.common:core:1.0.0-SNAPSHOT'
 
+    testImplementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.+'
+
 }
 
 publishing {
